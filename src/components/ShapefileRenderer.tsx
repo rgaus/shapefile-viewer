@@ -1,12 +1,8 @@
 "use client";
 
-import { Circle, CircleMarker, Polygon, Polyline, Popup, Rectangle } from 'react-leaflet';
-import { MapContainer } from 'react-leaflet/MapContainer';
-import { TileLayer } from 'react-leaflet/TileLayer';
-import { useMap } from 'react-leaflet/hooks';
-import 'leaflet/dist/leaflet.css';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const center: [number, number] = [51.505, -0.09];
 
@@ -60,16 +56,23 @@ const purpleOptions = { color: 'purple' }
 const redOptions = { color: 'red' }
 
 function ShapefileRenderer() {
+  const mapRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
-    // create map
-    const map = L.map('map', {
-      center: [49.8419, 24.0315],
+    if (!mapRef.current) {
+      return;
+    }
+
+    // Initially create map
+    const map = L.map(mapRef.current, {
+      center: [51.505, -0.09],
       zoom: 16,
       layers: [
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
           attribution:
             '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }),
+        L.polygon(polygon, { color: '#ff0000' }),
       ]
     });
 
@@ -80,7 +83,7 @@ function ShapefileRenderer() {
   }, []);
 
   return (
-    <div id="map" style={{ height: "100vh" }} />
+    <div ref={mapRef} className="w-full h-full" />
   );
 }
 
