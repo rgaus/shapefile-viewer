@@ -2,6 +2,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { cn } from "@/lib/utils";
 import ShapefileRendererWrapper from "@/components/ShapefileRendererWrapper";
+import UploadShapefile from "@/components/UploadShapefile";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,6 +17,7 @@ const geistMono = Geist_Mono({
 export default function Home() {
   return (
     <div className={cn(geistSans.className, geistMono.className, "fixed inset-0")}>
+      <UploadShapefile />
       <ShapefileRendererWrapper />
     </div>
   );
