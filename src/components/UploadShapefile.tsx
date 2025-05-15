@@ -1,12 +1,16 @@
 import { useCallback } from 'react';
 import parseShapefile from '@/lib/parse-shapefile';
+import useShapefileDataContext from '@/contexts/shapefile-data';
 
 const UploadShapefile: React.FunctionComponent<{}> = () => {
+  const { onMarkDataProcessing, onLoadData } = useShapefileDataContext();
+
   const parseFile = useCallback(async (file: File) => {
+    onMarkDataProcessing();
     const arrayBuffer = await file.arrayBuffer();
     const entities = await parseShapefile(arrayBuffer);
-    console.log('>', entities);
-  }, []);
+    onLoadData(entities);
+  }, [onMarkDataProcessing, onLoadData]);
 
   return (
     <input
