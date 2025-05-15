@@ -4,10 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 export type ShapefileMetadata = {
   id: string;
   name: string;
-  entities: Array<ShapefileMetadataEntity>;
+  entities: Array<ShapefileEntity>;
 };
 
-export type ShapefileMetadataEntity = {
+export type ShapefileEntity = {
   id: string;
   type: 'polygon',
   points: Array<[number, number]>,
@@ -17,7 +17,7 @@ export default async function parseShapefile(input: ArrayBuffer): Promise<Array<
   const parsedContents = await Shapefile.load(input);
 
   return Object.entries(parsedContents).map(([subFile, shapefile]) => {
-    const entities: Array<ShapefileMetadataEntity> = [];
+    const entities: Array<ShapefileEntity> = [];
 
     const parsed = shapefile.parse('shp');
     for (const record of parsed.records) {
@@ -25,11 +25,11 @@ export default async function parseShapefile(input: ArrayBuffer): Promise<Array<
         case ShapeType.Polygon: {
           // NOTE: the typescript types here don't seem to handle the discriminated union properly?
           const body = record.body.data as ShapePolygon;
+          const points = body.points as unknown as Array<{x: number, y: number}>;
           entities.push({
             id: uuidv4(),
             type: 'polygon',
-            // NOTE: the types are messed up here too?
-            points: body.points as unknown as Array<[number, number]>,
+            points: points.map(point => [point.x, point.y]),
           });
         }
         // FIXME: parse more kinds of data here!

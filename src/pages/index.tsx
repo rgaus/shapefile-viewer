@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import ShapefileRendererWrapper from "@/components/ShapefileRendererWrapper";
 import UploadShapefile from "@/components/UploadShapefile";
 import { ShapefileDataProvider } from "@/contexts/shapefile-data";
+import ShapefileSidebar from "@/components/ShapefileSidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,7 +21,10 @@ export default function Home() {
     <div className={cn(geistSans.className, geistMono.className, "fixed inset-0")}>
       <ShapefileDataProvider>
         <UploadShapefile />
-        <ShapefileRendererWrapper />
+        <div className="flex h-full w-full">
+          <ShapefileSidebar />
+          <ShapefileRendererWrapper />
+        </div>
       </ShapefileDataProvider>
     </div>
   );
