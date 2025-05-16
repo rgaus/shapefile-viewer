@@ -43,6 +43,7 @@ export default async function parseShapefile(input: ArrayBuffer): Promise<{
     const projection = new TextDecoder().decode(shapefile.contents.prj);
     const converter = proj4(projection, "WGS84");
 
+    // Compute the center of each entry's bounding box
     const { minX, minY, maxX, maxY } = parsed.header.boundingBox;
     const upperLeft = reformatXYasLatLng(converter.forward({ x: minX, y: minY }));
     const upperRight = reformatXYasLatLng(converter.forward({ x: minX, y: maxY }));

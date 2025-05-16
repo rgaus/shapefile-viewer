@@ -2,8 +2,9 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 import { LatLngCoordinate, ShapefileMetadata } from "@/lib/parse-shapefile";
 
 type ShapefileData =
-  | { status: 'uploading' }
+  | { status: 'idle' }
   | { status: 'processing' }
+  | { status: 'error', message: string | null }
   | {
     status: 'ready',
     initialCenter: LatLngCoordinate,
@@ -13,16 +14,21 @@ type ShapefileData =
 type ContextValue = {
   data: ShapefileData;
   onMarkDataProcessing: () => void;
+  onMarkDataError: (message: string) => void;
   onLoadData: (data: Array<ShapefileMetadata>, initialCenter: LatLngCoordinate) => void;
 };
 
 const ShapefileDataContext = createContext<ContextValue | null>(null);
 
 export const ShapefileDataProvider: React.FunctionComponent<{children: React.ReactNode}> = ({ children }) => {
-  const [data, setData] = useState<ShapefileData>({ status: 'uploading' });
+  const [data, setData] = useState<ShapefileData>({ status: 'idle' });
 
   const onMarkDataProcessing = useCallback(() => {
     setData({ status: 'processing' });
+  }, [setData]);
+
+  const onMarkDataError = useCallback((message: string) => {
+    setData({ status: 'error', message });
   }, [setData]);
 
   const onLoadData = useCallback((data: Array<ShapefileMetadata>, initialCenter: LatLngCoordinate) => {
@@ -32,8 +38,9 @@ export const ShapefileDataProvider: React.FunctionComponent<{children: React.Rea
   const providerValue: ContextValue = useMemo(() => ({
     data,
     onMarkDataProcessing,
+    onMarkDataError,
     onLoadData,
-  }), [data, onMarkDataProcessing, onLoadData]);
+  }), [data, onMarkDataProcessing, onMarkDataError, onLoadData]);
 
   return (
     <ShapefileDataContext.Provider value={providerValue}>
