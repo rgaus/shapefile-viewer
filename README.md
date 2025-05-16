@@ -1,7 +1,9 @@
 # Shapefile Viewer
 
-![readme2.png](readme2.png)
-![readme1.png](readme1.png)
+<p float="left">
+  <img src="/readme2.png" width="49%" />
+  <img src="/readme1.png" width="49%" />
+</p>
 
 ## Overview
 This is the beginnings of a web application that a user could use to render shapefiles. Right now,
