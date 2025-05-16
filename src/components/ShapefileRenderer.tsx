@@ -24,7 +24,7 @@ function ShapefileRenderer() {
         switch (entity.type) {
           case 'polygon': {
             // FIXME: is this data supposed to be a polygon or multipolygon?
-            return L.polygon(entity.points, { color: 'red', weight: 2 });
+            return L.polygon(entity.points, { color: 'royalblue', weight: 2 });
           }
           // FIXME: add more types of entities!
         }
