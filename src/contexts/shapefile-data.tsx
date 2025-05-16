@@ -1,18 +1,19 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { ShapefileMetadata } from "@/lib/parse-shapefile";
+import { LatLngCoordinate, ShapefileMetadata } from "@/lib/parse-shapefile";
 
 type ShapefileData =
   | { status: 'uploading' }
   | { status: 'processing' }
   | {
     status: 'ready',
+    initialCenter: LatLngCoordinate,
     data: Array<ShapefileMetadata>,
   };
 
 type ContextValue = {
   data: ShapefileData;
   onMarkDataProcessing: () => void;
-  onLoadData: (data: Array<ShapefileMetadata>) => void;
+  onLoadData: (data: Array<ShapefileMetadata>, initialCenter: LatLngCoordinate) => void;
 };
 
 const ShapefileDataContext = createContext<ContextValue | null>(null);
@@ -24,8 +25,8 @@ export const ShapefileDataProvider: React.FunctionComponent<{children: React.Rea
     setData({ status: 'processing' });
   }, [setData]);
 
-  const onLoadData = useCallback((data: Array<ShapefileMetadata>) => {
-    setData({ status: 'ready', data });
+  const onLoadData = useCallback((data: Array<ShapefileMetadata>, initialCenter: LatLngCoordinate) => {
+    setData({ status: 'ready', data, initialCenter });
   }, [setData]);
 
   const providerValue: ContextValue = useMemo(() => ({

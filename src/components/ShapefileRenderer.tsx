@@ -5,12 +5,9 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import grayscaleTileLayer from '@/lib/grayscale-tilelayer';
 import useShapefileDataContext from '@/contexts/shapefile-data';
+import { LatLngCoordinate } from '@/lib/parse-shapefile';
 
-const polygon: Array<[number, number]> = [
-  [51.515, -0.09],
-  [51.52, -0.1],
-  [51.52, -0.12],
-];
+const LONDON_LAT_LNG: LatLngCoordinate = [51.505, -0.09];
 
 function ShapefileRenderer() {
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -35,7 +32,7 @@ function ShapefileRenderer() {
 
     // Initially create map
     const map = L.map(mapRef.current, {
-      center: [51.505, -0.09],
+      center: data.status === 'ready' ? data.initialCenter : LONDON_LAT_LNG,
       zoom: 16,
       layers: [
         grayscaleTileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {

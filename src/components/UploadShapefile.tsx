@@ -8,8 +8,8 @@ const UploadShapefile: React.FunctionComponent<{}> = () => {
   const parseFile = useCallback(async (file: File) => {
     onMarkDataProcessing();
     const arrayBuffer = await file.arrayBuffer();
-    const entities = await parseShapefile(arrayBuffer);
-    onLoadData(entities);
+    const result = await parseShapefile(arrayBuffer);
+    onLoadData(result.metadataList, result.center);
   }, [onMarkDataProcessing, onLoadData]);
 
   return (

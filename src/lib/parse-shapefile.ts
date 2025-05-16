@@ -1,24 +1,35 @@
 import { Shapefile, ShapePolygon, ShapeType } from 'shapefile.js';
 import { v4 as uuidv4 } from 'uuid';
 import proj4 from 'proj4';
+import { center as turfCenter } from "@turf/center";
+import { points as turfPoints } from "@turf/helpers";
 
+export type LatLngCoordinate = [number, number];
 
 export type ShapefileMetadata = {
   id: string;
   name: string;
+  center: LatLngCoordinate;
   entities: Array<ShapefileEntity>;
 };
 
 export type ShapefileEntity = {
   id: string;
   type: 'polygon',
-  points: Array<[number, number]>,
+  points: Array<LatLngCoordinate>,
 };
 
-export default async function parseShapefile(input: ArrayBuffer): Promise<Array<ShapefileMetadata>> {
+function reformatXYasLatLng(input: { x: number, y: number }): LatLngCoordinate {
+  return [input.y, input.x];
+}
+
+export default async function parseShapefile(input: ArrayBuffer): Promise<{
+  center: LatLngCoordinate,
+  metadataList: Array<ShapefileMetadata>,
+}> {
   const parsedContents = await Shapefile.load(input);
 
-  return Object.entries(parsedContents).map(([subFile, shapefile]) => {
+  const metadataList = Object.entries(parsedContents).map(([subFile, shapefile]) => {
     const entities: Array<ShapefileEntity> = [];
     const parsed = shapefile.parse('shp');
 
@@ -32,6 +43,15 @@ export default async function parseShapefile(input: ArrayBuffer): Promise<Array<
     const projection = new TextDecoder().decode(shapefile.contents.prj);
     const converter = proj4(projection, "WGS84");
 
+    const { minX, minY, maxX, maxY } = parsed.header.boundingBox;
+    const upperLeft = reformatXYasLatLng(converter.forward({ x: minX, y: minY }));
+    const upperRight = reformatXYasLatLng(converter.forward({ x: minX, y: maxY }));
+    const lowerLeft = reformatXYasLatLng(converter.forward({ x: maxX, y: minY }));
+    const lowerRight = reformatXYasLatLng(converter.forward({ x: maxX, y: maxY }));
+
+    const centerResult = turfCenter(turfPoints([ upperLeft, upperRight, lowerLeft, lowerRight ]));
+    const center = centerResult.geometry.coordinates as LatLngCoordinate;
+
     for (const record of parsed.records) {
       switch (record.body.type) {
         case ShapeType.Polygon: {
@@ -43,7 +63,7 @@ export default async function parseShapefile(input: ArrayBuffer): Promise<Array<
             type: 'polygon',
             points: points.map(point => {
               const converted = converter.forward({ x: point.x, y: point.y });
-              return [converted.y, converted.x];
+              return reformatXYasLatLng(converted);
             }),
           });
         }
@@ -51,6 +71,11 @@ export default async function parseShapefile(input: ArrayBuffer): Promise<Array<
       }
     }
 
-    return { id: uuidv4(), name: subFile, entities };
+    return { id: uuidv4(), name: subFile, center, entities };
   }).filter((result): result is ShapefileMetadata => result !== null);
+
+  const centerResult = turfCenter(turfPoints(metadataList.map(item => item.center)))
+  const center = centerResult.geometry.coordinates as LatLngCoordinate;
+
+  return { center, metadataList };
 }
