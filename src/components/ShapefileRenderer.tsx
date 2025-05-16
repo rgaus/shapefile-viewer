@@ -26,14 +26,12 @@ function ShapefileRenderer() {
       return metadata.entities.map(entity => {
         switch (entity.type) {
           case 'polygon': {
-            return L.polygon(entity.points, { color: 'red' });
+            return L.polygon(entity.points, { color: 'red', weight: 2 });
           }
           // FIXME: add more types of entities!
         }
       });
     }) : [];
-
-    console.log('LAYERS', layers);
 
     // Initially create map
     const map = L.map(mapRef.current, {
