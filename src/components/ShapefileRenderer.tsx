@@ -23,6 +23,7 @@ function ShapefileRenderer() {
       return metadata.entities.map(entity => {
         switch (entity.type) {
           case 'polygon': {
+            // FIXME: is this data supposed to be a polygon or multipolygon?
             return L.polygon(entity.points, { color: 'red', weight: 2 });
           }
           // FIXME: add more types of entities!
